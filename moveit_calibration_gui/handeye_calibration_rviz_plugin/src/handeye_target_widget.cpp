@@ -119,7 +119,7 @@ TargetTabWidget::TargetTabWidget(rclcpp::Node::SharedPtr node, HandEyeCalibratio
   connect(ros_topics_["image_topic"], SIGNAL(activated(const QString&)), this,
           SLOT(imageTopicComboboxChanged(const QString&)));
 
-  // Target image dislay, create and save area
+  // Target image display, create and save area
   QGroupBox* group_right = new QGroupBox("Target", this);
   group_right->setMinimumWidth(330);
   layout->addWidget(group_right);
@@ -138,7 +138,7 @@ TargetTabWidget::TargetTabWidget(rclcpp::Node::SharedPtr node, HandEyeCalibratio
   layout_right->addWidget(save_target_btn);
   connect(save_target_btn, SIGNAL(clicked(bool)), this, SLOT(saveTargetImageBtnClicked(bool)));
 
-  // Load availible target plugins
+  // Load available target plugins
   loadAvailableTargetPlugins();
 
   // Initialize image publisher
@@ -462,9 +462,12 @@ void TargetTabWidget::cameraInfoCallback(sensor_msgs::msg::CameraInfo::ConstShar
     if (target_ && msg->height > 0 && msg->width > 0 && !msg->k.empty() && !msg->d.empty())
     {
       RCLCPP_DEBUG(node_->get_logger(), "Received camera info.");
-      camera_info_ = msg;
-      target_->setCameraIntrinsicParams(camera_info_);
-      Q_EMIT cameraInfoChanged(*camera_info_);
+      bool success = target_->setCameraIntrinsicParams(msg);
+      if (success)
+      {
+        camera_info_ = msg;
+        Q_EMIT cameraInfoChanged(*camera_info_);
+      }
     }
     else
     {
